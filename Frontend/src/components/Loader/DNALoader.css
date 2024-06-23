@@ -1,0 +1,39 @@
+/* src/components/DNALoader.css */
+.dna-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .double-helix {
+    position: relative;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .helix {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 4px solid transparent;
+    border-top-color: #00BFFF;
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+  }
+  
+  .helix:nth-child(2) {
+    border: 4px solid transparent;
+    border-bottom-color: #00BFFF;
+    animation-direction: reverse;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  

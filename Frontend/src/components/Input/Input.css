@@ -1,0 +1,12 @@
+.superscript-label {
+    position: absolute;
+    top: 0;
+    left: 2px; /* Adjust as needed */
+    margin-top: -2px; /* Adjust to align properly */
+    background-color: white;
+    padding: 0 2px;
+    color: #4a5568; /* Adjust text color as needed */
+    font-size: 0.75rem; /* Adjust font size as needed */
+    font-weight: 600; /* Adjust font weight as needed */
+  }
+  
