@@ -35,3 +35,15 @@ export const resetPasswordSchema = Joi.object({
     'any.only': 'Passwords do not match'
   }),
 });
+
+export const createDonationSchema = Joi.object({
+  donationAmount: Joi.number().required().messages({
+    'number.base': 'Donation amount should be a number',
+    'any.required': 'Donation amount is required',
+  }),
+  donationDay: Joi.string().valid("Monthly", "Once").default("Monthly").messages({
+    'string.base': 'Donation day should be a string',
+    'any.only': 'Donation day must be either "Monthly" or "Once"',
+  }),
+ 
+});
