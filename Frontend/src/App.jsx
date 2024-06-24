@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Donate from './pages/Donate';
 import Symptoms from './pages/Symptoms';
 import Prevention from './pages/Prevention';
+import NotFound from './components/PageNotFound/NotFound';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path='/stay-safe' element={<Prevention/>}/>
             
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </Provider>
