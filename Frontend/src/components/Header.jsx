@@ -23,6 +23,7 @@ const Header = () => {
   const { data: user } = useSelector((state) => state.auth);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -43,14 +44,6 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchProfile());
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const openDonationModal = () => {
     setIsDonationModalOpen(true);
   };
@@ -58,6 +51,24 @@ const Header = () => {
   const closeDonationModal = () => {
     setIsDonationModalOpen(false);
   };
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Close mobile menu when a link is clicked
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-white shadow p-4 flex justify-between items-center">
@@ -70,7 +81,38 @@ const Header = () => {
             <a onClick={() => navigate("/dashboard")}>Covid Tracker</a>
           </h1>
         </div>
-        <nav className="ml-10 space-x-8 flex items-center">
+
+        {/* Mobile menu toggle button */}
+        <button
+          onClick={toggleMobileMenu}
+          className="block sm:hidden ml-auto focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            {isMobileMenuOpen ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
+            )}
+          </svg>
+        </button>
+        
+        {/* Desktop navigation */}
+        <nav className="hidden sm:flex ml-10 space-x-8 items-center">
           <a
             onClick={() => navigate("/dashboard")}
             className="flex items-center text-lg font-semibold text-gray-500 hover:bg-blue-100 p-2 rounded"
@@ -79,7 +121,7 @@ const Header = () => {
             Dashboard
           </a>
           <a
-            onClick={()=>navigate("/symptoms")}
+            onClick={() => navigate("/symptoms")}
             className="flex items-center text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded"
           >
             <FaHeadSideCough className="mr-2" />
@@ -93,7 +135,7 @@ const Header = () => {
             Donate
           </a>
           <a
-            onClick={()=>navigate("/stay-safe")}
+            onClick={() => navigate("/stay-safe")}
             className="flex items-center text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded"
           >
             <FaFlask className="mr-2" />
@@ -101,14 +143,62 @@ const Header = () => {
           </a>
         </nav>
       </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 w-full bg-white shadow-md z-10">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <a
+              onClick={() => {
+                navigate("/dashboard");
+                closeMobileMenu();
+              }}
+              className="text-lg font-semibold text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+            >
+              <MdInsertChart className="mr-2" />
+              Dashboard
+            </a>
+            <a
+              onClick={() => {
+                navigate("/symptoms");
+                closeMobileMenu();
+              }}
+              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+            >
+              <FaHeadSideCough className="mr-2" />
+              Symptoms
+            </a>
+            <a
+              onClick={() => {
+                openDonationModal();
+                closeMobileMenu();
+              }}
+              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+            >
+              <LiaDonateSolid className="mr-2" />
+              Donate
+            </a>
+            <a
+              onClick={() => {
+                navigate("/stay-safe");
+                closeMobileMenu();
+              }}
+              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+            >
+              <FaFlask className="mr-2" />
+              Prevention
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* User dropdown and notification */}
       <div className="relative flex items-center">
         <button
           className="p-2 rounded-full w-40 bg-gray-200 flex items-center justify-center ml-2"
-          onClick={toggleDropdown}
+          onClick={() => toggleDropdown()}
         >
-          <span className="mr-2 text-center text-gray-700">
-            {user?.fullName}
-          </span>
+          <span className="mr-2 text-center text-gray-700">{user?.fullName}</span>
           <FaChevronDown className="text-center text-gray-700" />
         </button>
 
@@ -128,7 +218,7 @@ const Header = () => {
               </li>
               <li>
                 <a
-                  onClick={handleLogOut}
+                  onClick={() => handleLogOut()}
                   className="px-4 py-2 text-gray-800 hover:bg-gray-100 flex items-center"
                 >
                   <FaSignOutAlt className="mr-2" /> Logout
@@ -137,11 +227,13 @@ const Header = () => {
             </ul>
           </div>
         )}
+
         <button className="p-2 ml-4 rounded-full bg-gray-200 relative">
           <FaBell className="text-gray-700" />
           <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
       </div>
+
       <Donate isOpen={isDonationModalOpen} onClose={closeDonationModal} />
     </header>
   );

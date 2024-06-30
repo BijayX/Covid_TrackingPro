@@ -41,9 +41,9 @@ export const createDonationSchema = Joi.object({
     'number.base': 'Donation amount should be a number',
     'any.required': 'Donation amount is required',
   }),
-  donationDay: Joi.string().valid("Monthly", "Once").default("Monthly").messages({
-    'string.base': 'Donation day should be a string',
-    'any.only': 'Donation day must be either "Monthly" or "Once"',
-  }),
+  donationday: Joi.string().valid("Monthly", "Once").required().messages({
+    'any.required':'Donation Day'
+}),
  
 });
+

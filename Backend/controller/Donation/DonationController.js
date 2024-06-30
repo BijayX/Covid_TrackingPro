@@ -11,13 +11,11 @@ export const createDonation = async (req, res) => {
 
   const { donationAmount, donationday } = req.body;
   const userId = req.user.id;
-
   try {
     const user = await Users.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     const newDonation = new Donation({
       donationAmount,
       donationday,

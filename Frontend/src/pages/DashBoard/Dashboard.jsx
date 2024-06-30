@@ -36,15 +36,15 @@ const Dashboard = () => {
   return (
     <>
       <Header />
-      <div className="flex">
-        <div>
+      <div className="flex flex-wrap">
+        <div className="w-full sm:w-1/4">
           <Sidebar />
         </div>
-        <div className="w-5/6 p-4">
+        <div className="w-full sm:w-3/4 p-4">
           <BarGraph />
         </div>
       </div>
-      <Toaster /> {/* Add Toaster component for displaying toasts */}
+      <Toaster /> 
     </>
   );
 

@@ -72,7 +72,7 @@ const Sidebar = () => {
           </li>
         ))}
       </ul>
-      <div className=" justify-center flex items-center mt-12">
+      <div className="mt-8 flex justify-center items-center">
         <Help />
       </div>
     </aside>

@@ -1,63 +1,74 @@
 import axios from "axios";
-import Donation from "../../model/DonationModel.js";
+import { createDonationSchema } from "../../validation/validationSchemas.js";
 import Users from "../../model/UserModel.js";
+import Donation from "../../model/DonationModel.js";
 
 export const initiateKhaltiPayment = async (req, res) => {
-  const { donationId } = req.body;
-  if (!donationId) {
-    return res.status(400).json({
-      message: "Please provide donationId,amount",
-    });
-  }
-  let donation = await Donation.findById(donationId);
-  if (!donation) {
-    return res.status(404).json({
-      message: "donation not Found with that id",
-    });
-  }
-  const amount = donation.donationAmount;
+  const { error } = createDonationSchema.validate(req.body);
 
-  // check the coming amount is the totalAmount of order
-  if (donation.donationAmount !== amount) {
-    return res.status(400).json({
-      message: "Amount must be equal to totalAmount",
-    });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
   }
-  const data = {
-    return_url: "http://localhost:3003/success",
-    purchase_order_id: donationId,
-    amount: amount * 100,
-    website_url: "https://digitalfoodbackend.onrender.com/",
-    purchase_order_name: "orderName_" + donationId,
-    customer_info: {
-      name: "Ram Bahadur",
-      email: "test@khalti.com",
-      phone: "9800000001",
-    },
-  };
-  const response = await axios.post(
-    "https://a.khalti.com/api/v2/epayment/initiate/",
-    data,
-    {
-      headers: {
-        Authorization: "key 28d0324746e74eca9cfc7967a70ec71e",
-      },
+
+  const { donationAmount, donationday } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-  );
 
-  donation.paymentDetails.pidx = response.data.pidx;
+    const newDonation = new Donation({
+      donationAmount,
+      donationday,
+      user: userId,
+    });
 
-  await donation.save();
-  res.status(200).json({
-    message: "Payment successful",
-    paymentUrl: response.data.payment_url,
-  });
+    await newDonation.save();
+
+    const data = {
+      return_url: "http://localhost:5173/success",
+      purchase_order_id: newDonation._id,
+      amount: donationAmount * 100,
+      website_url: "http://localhost:3003/",
+      purchase_order_name: "orderName_" + newDonation._id,
+      customer_info: {
+        name: user.fullName,
+        email: user.email,
+      },
+    };
+
+    const response = await axios.post(
+      "https://a.khalti.com/api/v2/epayment/initiate/",
+      data,
+      {
+        headers: {
+          Authorization: "key 28d0324746e74eca9cfc7967a70ec71e",
+        },
+      }
+    );
+
+    newDonation.paymentDetails = { pidx: response.data.pidx };
+
+    await newDonation.save();
+
+    res.status(201).json({
+      message: "Donation created and payment initiated successfully",
+      donation: newDonation,
+      paymentUrl: response.data.payment_url,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 export const verifyPidx = async (req, res) => {
   try {
     const userId = req.user.id;
-    const pidx = req.body.pidx;
+    const { pidx } = req.body;
+
     const response = await axios.post(
       "https://a.khalti.com/api/v2/epayment/lookup/",
       { pidx },
@@ -67,24 +78,32 @@ export const verifyPidx = async (req, res) => {
         },
       }
     );
-    // console.log(response.data.status);
-    if (response.data.status == "Completed") {
-      let donation = await Donation.find({ "paymentDetails.pidx": pidx });
 
-      donation[0].paymentDetails.method = "khalti";
-      donation[0].paymentDetails.status = "paid";
-      await donation[0].save();
-      const user = await Users.findById(userId);
-      await user.save();
-
-      res.status(200).json({
-        message: "Payment Verified Successfully!",
-      });
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-  } catch(err) {
-    console.log(err)
-    res.status(400).json({
-      message: "Payment Verification failed",
+
+    const donation = await Donation.findOne({
+      "paymentDetails.pidx": pidx,
+      user: userId,
     });
+
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    donation.paymentDetails = {
+      ...donation.paymentDetails,
+      status: response.data.status,
+      amount: response.data.amount,
+    };
+
+    await donation.save();
+
+    res.status(200).json({ message: "Payment verified successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
