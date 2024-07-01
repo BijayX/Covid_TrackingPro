@@ -53,9 +53,9 @@ const Donate = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+      <div className="bg-white p-9 rounded-lg shadow-lg w-96  relative">
         <button
-          className="absolute top-0 right-0 text-gray-500 text-3xl p-2"
+          className="absolute top-0 right-3 text-gray-500 text-4xl "
           onClick={onClose}
         >
           &times;
