@@ -62,6 +62,8 @@ const Donate = ({ isOpen, onClose }) => {
         </button>
         {step === 1 && (
           <>
+            <p className="text-xl text-red-600 text-center top-0 font-bold mb-2">Donate Now</p>
+
             <div className="flex flex-col items-center">
               <img
                 src={donateImage}
@@ -69,6 +71,7 @@ const Donate = ({ isOpen, onClose }) => {
                 className="mb-4 w-full rounded-lg"
               />
             </div>
+
             <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
               <div className="flex justify-between mb-4">
                 <button
