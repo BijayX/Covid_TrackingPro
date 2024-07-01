@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loginimage from "../../assets/loginimge.png";
 import Input from "../../components/Input";
@@ -8,11 +8,12 @@ import { registerUser, verifyEmail } from "../../store/authSlice";
 import { STATUSES } from "../../global/misc/statuses";
 import Loader from "../../components/Loader/Loader";
 import { toast, Toaster } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const { status } = useSelector((state) => state.auth);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +53,7 @@ const Register = () => {
     if (response?.error) {
       toast.error(response.error); // Display error toast
     } else {
-      toast.success("OTP verified successfully!"); // Display success toast
+      Swal.fire('Success!', 'OTP verified successfully!', 'success');
       setIsModalOpen(false);
       navigate("/login");
     }
@@ -151,12 +152,12 @@ const Register = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleOtpSubmit}
-        verifyotp={verifyOtp}
+        verifyOtp={verifyOtp}
         setVerifyOtp={setVerifyOtp}
         otpErrorMessage={otpErrorMessage}
       />
 
-      <Toaster /> {/* Add Toaster component for displaying toasts */}
+      <Toaster /> 
     </div>
   );
 };

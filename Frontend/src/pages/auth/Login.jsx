@@ -4,20 +4,25 @@ import Input from "../../components/Input";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../store/authSlice";
+import { loginUser, verifyEmail } from "../../store/authSlice";
 import { STATUSES } from "../../global/misc/statuses";
 import Loader from "../../components/Loader/Loader";
+import Modal from "../../components/Modal/Modal";
 import { toast, Toaster } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false); 
-  const { data, token, status } = useSelector((state) => state.auth);
+  const { status, isEmailVerified } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [verifyOtp, setVerifyOtp] = useState("");
+  const [otpErrorMessage, setOtpErrorMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,12 +34,28 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Show spinner on submit
+    setIsLoading(true);
     const response = await dispatch(loginUser(formData));
-    setIsLoading(false); // Hide spinner after response
+    setIsLoading(false);
     if (response?.error) {
-      toast.error(response.error); // Display error toast
+      toast.error(response.error);
+      if (response?.error === "Please verify your email before logging in. An OTP has been sent to your email.") {
+        setIsModalOpen(true);
+      }
+
     } else if (status === STATUSES.SUCCESS) {
+      navigate("/dashboard");
+    }
+  };
+
+  const handleOtpSubmit = async () => {
+    const response = await dispatch(
+      verifyEmail({ email: formData.email, verifyOtp })
+    );
+    if (response?.error) {
+      setOtpErrorMessage(response.error);
+    } else {
+      setIsModalOpen(false);
       navigate("/dashboard");
     }
   };
@@ -87,6 +108,7 @@ const Login = () => {
                 type="email"
                 placeholder="Email"
                 onChange={handleChange}
+                className="mb-4 w-full md:w-11/12"
               />
               <Input
                 name="password"
@@ -95,6 +117,7 @@ const Login = () => {
                 type="password"
                 placeholder="Password"
                 onChange={handleChange}
+                className="mb-4 w-full md:w-11/12"
               />
               <div className="mb-4 flex items-center justify-between w-full md:w-11/12">
                 <div className="flex items-center">
@@ -108,8 +131,8 @@ const Login = () => {
                   </label>
                 </div>
                 <a
-                  onClick={() => navigate("/forgot-Password")}
-                  className="text-blue-500 hover:text-blue-700"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-blue-500 hover:text-blue-700 cursor-pointer"
                 >
                   Forgot Password?
                 </a>
@@ -120,14 +143,14 @@ const Login = () => {
                   type="submit"
                   disabled={isLoading}
                 >
-                  {isLoading ? <Loader /> : "Login"}{" "}
+                  {isLoading ? <Loader /> : "Login"}
                 </button>
               </div>
             </form>
             <p className="text-center text-base font-medium mt-6">
               Don't have an account?{" "}
               <a
-                className="text-blue-500 hover:text-blue-700"
+                className="text-blue-500 hover:text-blue-700 cursor-pointer"
                 onClick={() => navigate("/register")}
               >
                 Create account
@@ -137,7 +160,16 @@ const Login = () => {
         </div>
       </div>
 
-      <Toaster /> 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleOtpSubmit}
+        verifyOtp={verifyOtp}
+        setVerifyOtp={setVerifyOtp}
+        otpErrorMessage={otpErrorMessage}
+      />
+
+      <Toaster />
     </div>
   );
 };

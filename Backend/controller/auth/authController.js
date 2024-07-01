@@ -56,6 +56,48 @@ export const register = async (req, res) => {
   }
 };
 
+// export const signIn = async (req, res) => {
+//   const { error } = signInSchema.validate(req.body);
+
+//   if (error) {
+//     return res.status(400).json({ message: error.details[0].message });
+//   }
+
+//   const { email, password } = req.body;
+
+//   try {
+//     const user = await Users.findOne({ email }).select("+password");
+
+//     if (!user) {
+//       return res.status(401).json({ message: "Invalid email or password" });
+//     }
+
+//     if (!user.isEmailVerified) {
+//       return res
+//         .status(401)
+//         .json({ message: "Please verify your email before logging in" });
+//     }
+
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid email or password" });
+//     }
+
+//     user.password = undefined;
+
+//     const token = await user.createJWT();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Login successfully",
+//       data: user,
+//       token: token,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 export const signIn = async (req, res) => {
   const { error } = signInSchema.validate(req.body);
 
@@ -73,9 +115,20 @@ export const signIn = async (req, res) => {
     }
 
     if (!user.isEmailVerified) {
-      return res
-        .status(401)
-        .json({ message: "Please verify your email before logging in" });
+      const verifyOtp = Math.floor(100000 + Math.random() * 900000);
+      user.verifyOtp = verifyOtp;
+      await user.save();
+
+      await sendEmail({
+        email,
+        subject: "Verify Your Email Address",
+        message: `Your OTP for email verification is ${verifyOtp}.`,
+      });
+
+      return res.status(401).json({
+        message:
+          "Please verify your email before logging in. An OTP has been sent to your email.",
+      });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -150,7 +203,7 @@ export const verifyOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Email is not registered" });
     }
-   
+
     const userInputOtp = parseInt(otp, 10);
     if (user.otp !== userInputOtp) {
       return res.status(400).json({ message: "Invalid OTP" });
@@ -247,7 +300,9 @@ export const verifyEmail = async (req, res) => {
   const { email, verifyOtp } = req.body;
 
   try {
-    const user = await Users.findOne({ email }).select("+verifyOtp +isEmailVerified");
+    const user = await Users.findOne({ email }).select(
+      "+verifyOtp +isEmailVerified"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "Email is not registered" });

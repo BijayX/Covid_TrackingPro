@@ -144,7 +144,6 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="sm:hidden absolute top-16 left-0 w-full bg-white shadow-md z-10">
           <div className="flex flex-col items-center space-y-4 py-4">
@@ -192,10 +191,9 @@ const Header = () => {
         </div>
       )}
 
-      {/* User dropdown and notification */}
       <div className="relative flex items-center">
         <button
-          className="p-2 rounded-full w-40 bg-gray-200 flex items-center justify-center ml-2"
+          className="p-2 rounded-full w-56 bg-gray-200 flex items-center justify-center ml-2"
           onClick={() => toggleDropdown()}
         >
           <span className="mr-2 text-center text-gray-700">{user?.fullName}</span>
@@ -228,10 +226,7 @@ const Header = () => {
           </div>
         )}
 
-        <button className="p-2 ml-4 rounded-full bg-gray-200 relative">
-          <FaBell className="text-gray-700" />
-          <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-        </button>
+
       </div>
 
       <Donate isOpen={isDonationModalOpen} onClose={closeDonationModal} />

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Input from "../../components/Input";
 
-const Modal = ({ isOpen, onClose, onSubmit, verifyotp, setVerifyOtp, otpErrorMessage, otpSuccessMessage }) => {
+const Modal = ({ isOpen, onClose, onSubmit, verifyOtp, setVerifyOtp, otpErrorMessage, otpSuccessMessage }) => {
   if (!isOpen) return null;
 
   return (
@@ -17,7 +17,7 @@ const Modal = ({ isOpen, onClose, onSubmit, verifyotp, setVerifyOtp, otpErrorMes
           id="otp"
           type="text"
           placeholder="Enter OTP"
-          value={verifyotp}
+          value={verifyOtp}
           onChange={(e) => setVerifyOtp(e.target.value)}
         />
         {otpErrorMessage && (
@@ -51,7 +51,7 @@ Modal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  verifyotp: PropTypes.string.isRequired,
+  verifyOtp: PropTypes.string.isRequired,
   setVerifyOtp: PropTypes.func.isRequired,
   otpErrorMessage: PropTypes.string,
   otpSuccessMessage: PropTypes.string,

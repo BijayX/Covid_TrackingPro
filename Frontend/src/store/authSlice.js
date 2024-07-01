@@ -12,6 +12,8 @@ const authSlice = createSlice({
       email: null,
       status: STATUSES.LOADING,
     },
+    emailVerificationStatus: STATUSES.IDLE, 
+    resetPasswordStatus: STATUSES.IDLE,
     
   },
   reducers: {
