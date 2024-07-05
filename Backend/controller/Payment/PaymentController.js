@@ -28,7 +28,7 @@ export const initiateKhaltiPayment = async (req, res) => {
     await newDonation.save();
 
     const data = {
-      return_url: "http://localhost:5173/success",
+      return_url: "http://192.168.18.8:5173/success",
       purchase_order_id: newDonation._id,
       amount: donationAmount * 100,
       website_url: "http://localhost:3003/",
@@ -64,11 +64,56 @@ export const initiateKhaltiPayment = async (req, res) => {
   }
 };
 
-export const verifyPidx = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { pidx } = req.body;
+// export const verifyPidx = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const { pidx } = req.body;
+//     console.log(pidx)
 
+//     const response = await axios.post(
+//       "https://a.khalti.com/api/v2/epayment/lookup/",
+//       { pidx },
+//       {
+//         headers: {
+//           Authorization: "key 28d0324746e74eca9cfc7967a70ec71e",
+//         },
+//       }
+//     );
+
+//     const user = await Users.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const donation = await Donation.findOne({
+//       "paymentDetails.pidx": pidx,
+//       user: userId,
+//     });
+
+//     if (!donation) {
+//       return res.status(404).json({ message: "Donation not found" });
+//     }
+
+//     donation.paymentDetails = {
+//       ...donation.paymentDetails,
+//       status: response.data.status,
+//       amount: response.data.amount,
+//     };
+
+//     await donation.save();
+
+//     res.status(200).json({ message: "Payment verified successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// };
+
+export const verifyPidx = async (req, res) => {
+  const userId = req.user.id;
+  const pidx = req.body.pidx;
+  
+  try {
     const response = await axios.post(
       "https://a.khalti.com/api/v2/epayment/lookup/",
       { pidx },
@@ -78,32 +123,36 @@ export const verifyPidx = async (req, res) => {
         },
       }
     );
+    
+    if (response.data.status === "Completed") {
+      // Find the donation with the specified pidx
+      let donation = await Donation.findOne({ "paymentDetails.pidx": pidx });
 
-    const user = await Users.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      if (donation) {
+        // Update payment details
+        donation.paymentDetails.method = "khalti";
+        donation.paymentDetails.status = "paid";
+        
+        // Save the updated donation
+        await donation.save();
+
+        res.status(200).json({
+          message: "Payment Verified Successfully!",
+        });
+      } else {
+        res.status(404).json({
+          message: "Donation not found for the given pidx.",
+        });
+      }
+    } else {
+      res.status(400).json({
+        message: "Payment status not completed.",
+      });
     }
-
-    const donation = await Donation.findOne({
-      "paymentDetails.pidx": pidx,
-      user: userId,
-    });
-
-    if (!donation) {
-      return res.status(404).json({ message: "Donation not found" });
-    }
-
-    donation.paymentDetails = {
-      ...donation.paymentDetails,
-      status: response.data.status,
-      amount: response.data.amount,
-    };
-
-    await donation.save();
-
-    res.status(200).json({ message: "Payment verified successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({
+      message: "Internal server error.",
+    });
   }
 };
+

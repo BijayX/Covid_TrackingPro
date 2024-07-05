@@ -29,7 +29,7 @@ const Sidebar = () => {
     ? countries.filter((country) =>
         country.name.toLowerCase().includes(search.toLowerCase())
       )
-    : countries.slice(0, 25);
+    : countries.slice(0, 24);
 
   if (loading) {
     return (

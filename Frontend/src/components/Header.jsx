@@ -15,7 +15,7 @@ import {
 } from "react-icons/md";
 import { LiaDonateSolid } from "react-icons/lia";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { fetchProfile, logOut } from "../store/authSlice";
 import Donate from "./Donate";
 
@@ -24,8 +24,10 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
+  const [activeLink, setActiveLink] = useState(""); 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation(); 
   const dispatch = useDispatch();
 
   const handleLogOut = () => {
@@ -52,12 +54,10 @@ const Header = () => {
     setIsDonationModalOpen(false);
   };
 
-  // Toggle mobile menu
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Close mobile menu when a link is clicked
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
@@ -69,6 +69,18 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === "/dashboard") {
+      setActiveLink("dashboard");
+    } else if (location.pathname === "/symptoms") {
+      setActiveLink("symptoms");
+    } else if (location.pathname === "/stay-safe") {
+      setActiveLink("prevention");
+    } else {
+      setActiveLink(""); // Reset active link if none matches
+    }
+  }, [location.pathname]);
 
   return (
     <header className="bg-white shadow p-4 flex justify-between items-center">
@@ -114,29 +126,41 @@ const Header = () => {
         {/* Desktop navigation */}
         <nav className="hidden sm:flex ml-10 space-x-8 items-center">
           <a
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center text-lg font-semibold text-gray-500 hover:bg-blue-100 p-2 rounded"
+            onClick={() => {
+              navigate("/dashboard");
+              setActiveLink("dashboard");
+            }}
+            className={`flex items-center text-lg font-semibold ${activeLink === "dashboard" ? "bg-blue-300" : ""} text-gray-500 p-2 rounded`}
           >
             <MdInsertChart className="mr-2" />
             Dashboard
           </a>
           <a
-            onClick={() => navigate("/symptoms")}
-            className="flex items-center text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded"
+            onClick={() => {
+              navigate("/symptoms");
+              setActiveLink("symptoms");
+            }}
+            className={`flex items-center text-lg font-medium ${activeLink === "symptoms" ? "bg-blue-300" : ""} text-gray-500 p-2 rounded`}
           >
             <FaHeadSideCough className="mr-2" />
             Symptoms
           </a>
           <a
-            onClick={openDonationModal}
-            className="flex items-center text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded"
+            onClick={() => {
+              openDonationModal();
+              setActiveLink("donate");
+            }}
+            className={`flex items-center text-lg font-medium ${activeLink === "donate" ? "bg-blue-300" : ""} text-gray-500 p-2 rounded`}
           >
             <LiaDonateSolid className="mr-2" />
             Donate
           </a>
           <a
-            onClick={() => navigate("/stay-safe")}
-            className="flex items-center text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded"
+            onClick={() => {
+              navigate("/stay-safe");
+              setActiveLink("prevention");
+            }}
+            className={`flex items-center text-lg font-medium ${activeLink === "prevention" ? "bg-blue-300" : ""} text-gray-500 p-2 rounded`}
           >
             <FaFlask className="mr-2" />
             Prevention
@@ -152,7 +176,7 @@ const Header = () => {
                 navigate("/dashboard");
                 closeMobileMenu();
               }}
-              className="text-lg font-semibold text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+              className={`text-lg font-semibold ${activeLink === "dashboard" ? "bg-blue-100" : ""} text-gray-500 p-2 rounded w-full flex items-center justify-center`}
             >
               <MdInsertChart className="mr-2" />
               Dashboard
@@ -162,7 +186,7 @@ const Header = () => {
                 navigate("/symptoms");
                 closeMobileMenu();
               }}
-              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+              className={`text-lg font-medium ${activeLink === "symptoms" ? "bg-blue-100" : ""} text-gray-500 p-2 rounded w-full flex items-center justify-center`}
             >
               <FaHeadSideCough className="mr-2" />
               Symptoms
@@ -172,7 +196,7 @@ const Header = () => {
                 openDonationModal();
                 closeMobileMenu();
               }}
-              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+              className={`text-lg font-medium ${activeLink === "donate" ? "bg-blue-100" : ""} text-gray-500 p-2 rounded w-full flex items-center justify-center`}
             >
               <LiaDonateSolid className="mr-2" />
               Donate
@@ -182,7 +206,7 @@ const Header = () => {
                 navigate("/stay-safe");
                 closeMobileMenu();
               }}
-              className="text-lg font-medium text-gray-500 hover:bg-blue-100 p-2 rounded w-full flex items-center justify-center"
+              className={`text-lg font-medium ${activeLink === "prevention" ? "bg-blue-100" : ""} text-gray-500 p-2 rounded w-full flex items-center justify-center`}
             >
               <FaFlask className="mr-2" />
               Prevention
@@ -193,7 +217,7 @@ const Header = () => {
 
       <div className="relative flex items-center">
         <button
-          className="p-2 rounded-full w-56 bg-gray-200 flex items-center justify-center ml-2"
+          className={`p-2 rounded-full w-56 bg-gray-200 flex items-center justify-center ml-2 ${activeLink ? "bg-blue-100" : ""}`}
           onClick={() => toggleDropdown()}
         >
           <span className="mr-2 text-center text-gray-700">{user?.fullName}</span>
@@ -225,7 +249,6 @@ const Header = () => {
             </ul>
           </div>
         )}
-
 
       </div>
 

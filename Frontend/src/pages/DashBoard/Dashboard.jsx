@@ -40,7 +40,7 @@ const Dashboard = () => {
         <div className="w-full sm:w-1/4">
           <Sidebar />
         </div>
-        <div className="w-full sm:w-3/4 p-4">
+        <div className="w-full sm:w-4/6 ml-12  p-2">
           <BarGraph />
         </div>
       </div>

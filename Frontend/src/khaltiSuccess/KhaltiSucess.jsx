@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 import { APIAuthenticated } from '../http';
-import Loader from '../components/Loader/Loader';
+import Loader from '../components/Loader/Loader'; 
 
 const KhaltiSuccess = () => {
   const queryParams = new URLSearchParams(location.search);
@@ -17,16 +17,15 @@ const KhaltiSuccess = () => {
       const response = await APIAuthenticated.post("/user/verifyPidx", { pidx });
       if (response.status === 200) {
         setLoading(false);
-        Swal.fire({
+        await Swal.fire({
           title: "Payment Successful!",
-          text: response.data.message,
+          // text: response.data.message,
+          text:"Thank you for your donation",
           icon: "success",
-          timer: 3000,
+          timer: 9000,
           timerProgressBar: true,
-          onClose: () => {
-            navigate("/dasboard");
-          }
         });
+        navigate("/dashboard"); 
       }
     } catch (error) {
       console.log(error);
@@ -35,10 +34,14 @@ const KhaltiSuccess = () => {
 
   useEffect(() => {
     verifyPidx();
-  }, []);
+  }, []); 
 
   if (loading) {
-    return <Loader />;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader size={24} className="text-blue-500" /> 
+      </div>
+    );
   } else {
     return null; 
   }
